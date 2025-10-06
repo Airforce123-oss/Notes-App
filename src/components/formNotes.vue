@@ -1,11 +1,12 @@
 <template>
   <div class="formNotes p-6 bg-white rounded-xl shadow-md flex flex-col gap-6">
-    <form @submit="submitNotes">
+    <form @submit.prevent="submitNotes">
       <!-- Menu -->
       <div class="flex justify-end gap-3">
         <button
           type="button"
           class="px-4 py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 transition"
+          @click="$emit('delete-note')"
         >
           Delete
         </button>
@@ -36,30 +37,48 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "formNotes",
-  props: {
-    propSaveNotes: {
-      type: Function,
-      required: true,
-    },
+<script setup>
+import { reactive, watch } from "vue";
+
+// ✅ Props
+const props = defineProps({
+  propSaveNotes: {
+    type: Function,
+    required: true,
   },
-  data() {
-    return {
-      note: {
-        title: "",
-        description: "",
-      },
-    };
+  propDataForm: {
+    type: Object,
+    default: () => ({}),
   },
-  methods: {
-    submitNotes(e) {
-      e.preventDefault();
-      console.log("Title:", this.note.title);
-      console.log("Description:", this.note.description);
-      this.propSaveNotes(this.note);
-    },
+});
+
+// ✅ Emit (untuk tombol Delete)
+const emit = defineEmits(["delete-note"]);
+
+// ✅ Reactive data
+const note = reactive({
+  title: "",
+  description: "",
+});
+
+// ✅ Watch agar form otomatis terisi saat edit
+watch(
+  () => props.propDataForm,
+  (newVal) => {
+    if (newVal && (newVal.title || newVal.description)) {
+      note.title = newVal.title || "";
+      note.description = newVal.description || "";
+    }
   },
-};
+  { immediate: true, deep: true }
+);
+
+// ✅ Submit handler
+function submitNotes() {
+  props.propSaveNotes({ ...note });
+
+  // reset form setelah disimpan
+  note.title = "";
+  note.description = "";
+}
 </script>

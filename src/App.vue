@@ -44,56 +44,62 @@
     <!-- Konten kanan -->
     <div class="flex-1 overflow-y-scroll bg-white p-6">
       <!-- Form Notes -->
-      <FormNotes :propSaveNotes="saveNote" />
+      <FormNotes :propSaveNotes="saveNote" :propDataForm="dataForm" />
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from "vue";
 import ListNotes from "./components/listNotes.vue";
 import FormNotes from "./components/formNotes.vue";
 
-export default {
-  name: "App",
-  data: function () {
-    return {
-      notes: [
-        {
-          id: 1,
-          title: "Catatan Harian Pagi Ini",
-          description:
-            "Menuliskan rencana dan prioritas kerja untuk hari ini. Fokus utama adalah menyelesaikan desain antarmuka aplikasi catatan digital",
-        },
-        {
-          id: 2,
-          title: "Ide Proyek Wegodev",
-          description:
-            "Konsep awal pengembangan fitur catatan berbasis cloud dengan sinkronisasi otomatis antara perangkat desktop dan mobile.",
-        },
-      ],
-    };
+const notes = ref([
+  {
+    id: 1,
+    title: "Catatan Harian Pagi Ini",
+    description:
+      "Menuliskan rencana dan prioritas kerja untuk hari ini. Fokus utama adalah menyelesaikan desain antarmuka aplikasi catatan digital",
   },
-  components: {
-    ListNotes,
-    FormNotes,
+  {
+    id: 2,
+    title: "Ide Proyek Wegodev",
+    description:
+      "Konsep awal pengembangan fitur catatan berbasis cloud dengan sinkronisasi otomatis antara perangkat desktop dan mobile.",
   },
-  methods: {
-    newNotes() {
-      alert("Buat note baru!");
-    },
-    editNote(id) {
-      console.log("Edit note dengan ID:" + id);
-    },
-    saveNote(note) {
-      let newNote = {
-        title: note.title,
-        description: note.description,
-      };
-      this.notes.push(newNote);
-      console.log("Notes saved:", newNote);
-    },
+]);
+
+const dataForm = ref({});
+
+function newNotes() {
+  alert("Buat note baru!");
+}
+
+function editNote(id) {
+  dataForm.value = notes.value.find((note) => note.id === id);
+  console.log("isi dataform", dataForm.value);
+}
+
+function saveNote(note) {
+  const newNote = {
+    id: Date.now(),
+    title: note.title,
+    description: note.description,
+  };
+  notes.value.push(newNote);
+  console.log("Notes saved:", newNote);
+}
+
+watch(
+  dataForm,
+  (newVal) => {
+    if (newVal) {
+      console.log("dataForm berubah:", newVal);
+      // di sini bisa tambahkan aksi jika mau
+    }
   },
-};
+  { deep: true }
+);
 </script>
 
 <style>
